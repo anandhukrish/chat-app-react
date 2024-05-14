@@ -10,9 +10,11 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { app } from "../api/axios";
+import { useNavigate } from "react-router-dom";
 
 const RegisterForm = () => {
   const toast = useToast();
+  const navigate = useNavigate();
   const [show, setShow] = useState(false);
   const [name, setName] = useState();
   const [email, setEmail] = useState();
@@ -77,7 +79,7 @@ const RegisterForm = () => {
         isClosable: true,
         status: "error",
         duration: 5000,
-        position: "bottom",
+        position: "top-right",
       });
       setLoading(false);
       return;
@@ -90,25 +92,43 @@ const RegisterForm = () => {
         isClosable: true,
         status: "error",
         duration: 5000,
-        position: "bottom",
+        position: "top-right",
       });
       setLoading(false);
       return;
     }
-    const { data } = await app.post("/api/user/register", {
-      name,
-      email,
-      password,
-      pic,
-    });
+    try {
+      const { data } = await app.post("/api/user/register", {
+        name,
+        email,
+        password,
+        pic,
+      });
 
-    localStorage.setItem("user", JSON.stringify(data));
-    setName();
-    setEmail();
-    setPassword();
-    setConfirmPassword();
-    setPic();
-    setLoading(false);
+      localStorage.setItem("user", JSON.stringify(data));
+      setLoading(false);
+      setName("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+      toast({
+        title: "Registration successfull",
+        isClosable: true,
+        status: "success",
+        duration: 5000,
+        position: "top-right",
+      });
+    } catch (error) {
+      toast({
+        title: "Error Occured",
+        description: error.message,
+        isClosable: true,
+        status: "error",
+        duration: 5000,
+        position: "top-right",
+      });
+      setLoading(false);
+    }
   };
   return (
     <VStack>
@@ -116,6 +136,7 @@ const RegisterForm = () => {
         <FormLabel>Name</FormLabel>
         <Input
           placeholder="Enter Your Name"
+          value={name}
           onChange={(e) => setName(e.target.value)}
         />
       </FormControl>
@@ -123,6 +144,7 @@ const RegisterForm = () => {
         <FormLabel>Email</FormLabel>
         <Input
           placeholder="Enter Your Email"
+          value={email}
           type="email"
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -134,6 +156,7 @@ const RegisterForm = () => {
             pr="4.5rem"
             type={show ? "text" : "password"}
             placeholder="Enter password"
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
           <InputRightElement width="4.5rem">
@@ -150,6 +173,7 @@ const RegisterForm = () => {
             pr="4.5rem"
             type={show ? "text" : "password"}
             placeholder="Confirm password"
+            value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
           <InputRightElement width="4.5rem">
